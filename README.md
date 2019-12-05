@@ -17,6 +17,6 @@ companies which are in Cyberpark are marked.
 
 # How To Use?
 ```python
-first_process()   # would the start the first spider
+first_process()   # would start the first spider
 second_process()  # would start the second spider
 ```
