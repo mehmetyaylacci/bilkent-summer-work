@@ -22,4 +22,4 @@ second_process()  # would start the second spider
 ```
 
 # Future
-- [] adding pandas and xlsxwriter implementation for turning csv to excel.  
+- [ ] adding pandas and xlsxwriter implementation for turning csv to excel.  
