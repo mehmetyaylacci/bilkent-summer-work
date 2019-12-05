@@ -9,7 +9,7 @@ There are information of 4306 companies. Qualified departments are also added. T
 companies which are in Cyberpark are marked.
 
 # Some Important Notes
-* As recommended this project will only create two csv files on .txt format
+* As recommended this project will only create two csv files on .txt format which are stored on 'data' folder. 
 * Other libraries could also be used, but I've chosen to use scrapy on this project, please don't recommend me to use other libs (like urllib.requests, selenium or others). Scrapy is the coolest way to scrape these kinds of data :)
 * I didn't want to create a scrapy project so we will use a primitive way of using spiders.
 * Try not to crush Bilkent's servers. Adding waiting time for our spiders will hopefully solve this issue.
