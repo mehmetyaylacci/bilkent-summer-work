@@ -16,3 +16,7 @@ companies which are in Cyberpark are marked.
 * The information is fetched from: http://mfstaj.cs.bilkent.edu.tr
 
 # How To Use?
+```python
+first_process()   # would the start the first spider
+second_process()  # would start the second spider
+```
