@@ -85,24 +85,26 @@ class first_spider(scrapy.Spider):
 
         stuff = []
 
-        size = len(soup.find_all("td", class_="companyName"))
+        all_rows = soup.find_all("tr", class_="company")
+        size = len(all_rows)
 
         former_id = 0  # this checks duplicates. thanks bilkent for the mistakes :(
 
-        for x in range(size):
-                company = soup.find_all("td", class_="companyName")[x]
-                companyTop = soup.find_all("tr", class_="company")[x]
-                listOfAtt = companyTop.find_all("td")
+        for row in all_rows:
+            company_info = row.find_all("td")
+            name = company_info[0].getText().strip(' ')
+            city = company_info[1].getText().strip(' ')
+            depts = company_info[2].getText().strip(' ')
+            sector = company_info[3].getText().strip(' ')
+            cid = company_info[0].find("a")["href"].split('CompanyID=')[1]
 
-                newID = company.find("a")["href"][-4:].strip()
-
-                # getting rid of duplicates will help us on the next spider.
-                if newID != former_id:
-                        self.writer.writerow([company.get_text().strip(), newID,
-                                                    listOfAtt[1].get_text().strip(), listOfAtt[2].get_text().strip(),
-                                                        listOfAtt[3].get_text().strip()])
-
-                        former_id = company.find("a")["href"][-4:].strip()
+            # this is all preparation to eventually move to pandas as that's the industry standard
+            new_company = {'name':name, 'city':city, 'depts':depts, 'sector':sector}
+            if cid in self.companies:
+                self.companies[cid].update(new_company) # this will merge info if there are duplicates while enforcing there are no dupes
+            else:
+                self.companies[cid] = new_company
+                self.writer.writerow([ name,  cid, city, depts, sector])
 
 ########
 
