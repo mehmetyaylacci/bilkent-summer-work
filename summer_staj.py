@@ -4,6 +4,7 @@ from scrapy.crawler import CrawlerProcess
 import csv
 from bs4 import BeautifulSoup as bs
 from urllib import request
+import logging
 
 """
 Author: Mehmet Yaylacı
@@ -162,3 +163,13 @@ def second_process():
     process2 = CrawlerProcess()
     process2.crawl(second_spider)
     process2.start()
+
+
+def setup_logger():
+    FORMAT = '%(asctime)-15s %(levelname)s | %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+    logging.debug('DEBUG messages are printed')
+    logging.info('INFO messages are printed')
+    logging.warning('WARNING messages are printed')
+    logging.error('ERROR messages are printed')
+    logging.critical('CRITICAL messages are printed')
