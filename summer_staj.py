@@ -35,7 +35,7 @@ second_outfile = "data/second.csv"
 second_infile = first_outfile
 
 CUSTOM_SETTINGS = { 'DOWNLOAD_DELAY': 0.1,
-                    'ITEM_PIPELINES': {'freedom.pipelines.IndexPipeline': 300 }
+                    # 'ITEM_PIPELINES': {'freedom.pipelines.IndexPipeline': 300 }
                     }
 
 """
