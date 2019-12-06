@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as bs
 from urllib import request
 import time
 import logging
+from pprint import pprint
 
 """
 Author: Mehmet Yaylacı
@@ -33,6 +34,10 @@ first_outfile = "data/first.csv"
 second_outfile = "data/second.csv"
 second_infile = first_outfile
 
+CUSTOM_SETTINGS = { 'DOWNLOAD_DELAY': 0.1,
+                    'ITEM_PIPELINES': {'freedom.pipelines.IndexPipeline': 300 }
+                    }
+
 """
     First of the spiders. Just goes through the first sets of pages and extracts links 
 with some other information.
@@ -40,9 +45,7 @@ with some other information.
 
 class first_spider(scrapy.Spider):
     name = 'first_spider'
-    custom_settings = { 'DOWNLOAD_DELAY': 0.1,
-                        'ITEM_PIPELINES': {'freedom.pipelines.IndexPipeline': 300 }
-                        }
+    custom_settings = CUSTOM_SETTINGS
     def __init__(self, *args, **kwargs):
         super(first_spider, self).__init__(*args, **kwargs)
         self.companies = dict()
@@ -76,6 +79,9 @@ class first_spider(scrapy.Spider):
         for page_num in range(last_page_num):
             url = "http://mfstaj.cs.bilkent.edu.tr/visitor/?page=company&start={}&filter=AllCompanies".format(page_num)
             yield scrapy.Request(url=url, callback=self.parse)
+
+        print('final companies dictionary')
+        pprint(self.companies)
 
     def parse(self, response):
         soup = bs(response.text, 'html.parser')
@@ -114,15 +120,10 @@ anytime so pls don't pressure the servers :(
 
 class second_spider(scrapy.Spider):
     name = 'second_spider'
+    custom_settings = CUSTOM_SETTINGS
 
     def start_requests(self):
         # setting custom settings, this will hopefully solve a possible ddos.
-        custom_settings = {
-            'DOWNLOAD_DELAY': 0.1,
-            'ITEM_PIPELINES': {
-                'freedom.pipelines.IndexPipeline': 300
-            }
-        }
 
         global second_infile, second_outfile
 
