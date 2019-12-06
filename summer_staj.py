@@ -40,6 +40,9 @@ with some other information.
 
 class first_spider(scrapy.Spider):
     name = 'first_spider'
+    custom_settings = { 'DOWNLOAD_DELAY': 0.1,
+                        'ITEM_PIPELINES': {'freedom.pipelines.IndexPipeline': 300 }
+                        }
     def __init__(self, *args, **kwargs):
         super(first_spider, self).__init__(*args, **kwargs)
         self.companies = dict()
@@ -47,12 +50,7 @@ class first_spider(scrapy.Spider):
 
     def start_requests(self):
         # setting custom settings, this will hopefully solve a possible ddos.
-        custom_settings = {
-            'DOWNLOAD_DELAY': 0.1,
-            'ITEM_PIPELINES': {
-                'freedom.pipelines.IndexPipeline': 300
-            }
-        }
+
 
         global first_outfile
 
