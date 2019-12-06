@@ -115,7 +115,7 @@ class second_spider(scrapy.Spider):
     def start_requests(self):
         # setting custom settings, this will hopefully solve a possible ddos.
         custom_settings = {
-            'DOWNLOAD_DELAY': 0.01,
+            'DOWNLOAD_DELAY': 0.1,
             'ITEM_PIPELINES': {
                 'freedom.pipelines.IndexPipeline': 300
             }
