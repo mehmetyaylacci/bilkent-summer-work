@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import Crawler, CrawlerProcess
 import csv
 from bs4 import BeautifulSoup as bs
 from urllib import request
 import time
 import logging
 from pprint import pprint
+import argparse
 
 """
 Author: Mehmet Yaylacı
@@ -159,18 +160,6 @@ class second_spider(scrapy.Spider):
 so call them one at a time.
 """
 
-def first_process():
-    process = CrawlerProcess()
-    process.crawl(first_spider)
-    process.start()
-
-
-def second_process():
-    process2 = CrawlerProcess()
-    process2.crawl(second_spider)
-    process2.start()
-
-
 def setup_logger():
     FORMAT = '%(asctime)-15s %(name)s - %(levelname)s: %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.DEBUG)
@@ -184,14 +173,29 @@ def setup_logger():
 def main():
     setup_logger()
 
-    logging.info('starting first_process')
-    first_process()
-    logging.info('first_process finished')
-    # time.sleep(1)
-    # logging.info('starting second_process')
-    # second_process()
-    # logging.info('second_process finished')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('crawl_type', help='"list" or "details". Note that you must have run list beforehand to be able to run details')
+    args = parser.parse_args()
 
+    if args.crawl_type == 'list':
+        spider_instance = Crawler(first_spider)
+    elif args.crawl_type == 'details':
+        spider_instance =  Crawler(second_spider)
+    else:
+        print('Argument must be "list" or "details"')
+        return
+
+    process = CrawlerProcess()
+    process.crawl(spider_instance)
+    logging.info('starting crawling process')
+    process.start(stop_after_crawl=True)
+    logging.info('crawling process finished')
+    process.join()
+    logging.info('all crawlers finished')
+
+    if args.crawl_type == 'list':
+        print('final companies list')
+        pprint(spider_instance.spider.companies)
 
 if __name__ == '__main__':
     main()
