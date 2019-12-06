@@ -157,6 +157,7 @@ def first_process():
     process.crawl(first_spider)
     process.start()
 
+
 def second_process():
     process2 = CrawlerProcess()
     process2.crawl(second_spider)
