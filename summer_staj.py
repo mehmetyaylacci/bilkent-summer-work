@@ -74,7 +74,6 @@ class first_spider(scrapy.Spider):
             page_indicator = first_col.find("span", {"style": "font-size:1.2em;"}).getText()
             last_page_num = int(page_indicator.split('/')[1].replace(' ',''))
             logging.debug('last_page_num={}'.format(last_page_num))
-            input('haha')
 
         for page_num in range(last_page_num):
             url = "http://mfstaj.cs.bilkent.edu.tr/visitor/?page=company&start={}&filter=AllCompanies".format(page_num)
