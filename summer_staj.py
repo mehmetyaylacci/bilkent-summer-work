@@ -4,6 +4,7 @@ from scrapy.crawler import CrawlerProcess
 import csv
 from bs4 import BeautifulSoup as bs
 from urllib import request
+import time
 import logging
 
 """
@@ -173,3 +174,19 @@ def setup_logger():
     logging.warning('WARNING messages are printed')
     logging.error('ERROR messages are printed')
     logging.critical('CRITICAL messages are printed')
+
+
+def main():
+    setup_logger()
+
+    logging.info('starting first_process')
+    first_process()
+    logging.info('first_process finished')
+    # time.sleep(1)
+    # logging.info('starting second_process')
+    # second_process()
+    # logging.info('second_process finished')
+
+
+if __name__ == '__main__':
+    main()
