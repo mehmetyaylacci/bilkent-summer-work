@@ -80,9 +80,6 @@ class first_spider(scrapy.Spider):
             url = "http://mfstaj.cs.bilkent.edu.tr/visitor/?page=company&start={}&filter=AllCompanies".format(page_num)
             yield scrapy.Request(url=url, callback=self.parse)
 
-        print('final companies dictionary')
-        pprint(self.companies)
-
     def parse(self, response):
         soup = bs(response.text, 'html.parser')
         soup.prettify()
