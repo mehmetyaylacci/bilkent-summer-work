@@ -40,6 +40,10 @@ with some other information.
 
 class first_spider(scrapy.Spider):
     name = 'first_spider'
+    def __init__(self, *args, **kwargs):
+        super(first_spider, self).__init__(*args, **kwargs)
+        self.companies = dict()
+
 
     def start_requests(self):
         # setting custom settings, this will hopefully solve a possible ddos.
