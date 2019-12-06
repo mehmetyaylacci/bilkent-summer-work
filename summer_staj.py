@@ -171,7 +171,7 @@ def second_process():
 
 
 def setup_logger():
-    FORMAT = '%(asctime)-15s %(levelname)s | %(message)s'
+    FORMAT = '%(asctime)-15s %(name)s - %(levelname)s: %(message)s'
     logging.basicConfig(format=FORMAT, level=logging.DEBUG)
     logging.debug('DEBUG messages are printed')
     logging.info('INFO messages are printed')
