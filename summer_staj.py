@@ -29,8 +29,8 @@ hopefully solve this issue.
 ########
 
 # some global variables to create two csv files on .txt format
-first_outfile = "data/first.txt"
-second_outfile = "data/second.txt"
+first_outfile = "data/first.csv"
+second_outfile = "data/second.csv"
 second_infile = first_outfile
 
 """
