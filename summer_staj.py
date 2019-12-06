@@ -65,11 +65,15 @@ class first_spider(scrapy.Spider):
             html = response.read()
             page = bs(html)
             # page.prettify()
-            rangeOfPages = page.find("span", {"style": "font-size:1.2em;"}).getText()
+            company_table = page.find('table', {'id':'companies'})
+            first_col = company_table.find('td', {'style':'font-size:0.9em;'})
+            page_indicator = first_col.find("span", {"style": "font-size:1.2em;"}).getText()
+            last_page_num = int(page_indicator.split('/')[1].replace(' ',''))
+            logging.debug('last_page_num={}'.format(last_page_num))
+            input('haha')
 
-
-        for site in range(int(rangeOfPages[4:])):
-            url = "http://mfstaj.cs.bilkent.edu.tr/visitor/?page=company&start=" + str(site) + "&filter=AllCompanies"
+        for page_num in range(last_page_num):
+            url = "http://mfstaj.cs.bilkent.edu.tr/visitor/?page=company&start={}&filter=AllCompanies".format(page_num)
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
