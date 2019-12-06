@@ -44,11 +44,11 @@ CUSTOM_SETTINGS = { 'DOWNLOAD_DELAY': 0.1,
 with some other information.
 """
 
-class first_spider(scrapy.Spider):
-    name = 'first_spider'
+class FirstSpider(scrapy.Spider):
+    name = 'FirstSpider'
     custom_settings = CUSTOM_SETTINGS
     def __init__(self, *args, **kwargs):
-        super(first_spider, self).__init__(*args, **kwargs)
+        super(FirstSpider, self).__init__(*args, **kwargs)
         self.companies = dict()
 
 
@@ -116,8 +116,8 @@ pages one by one. Pls don't ddos Bilkent. Bilkent's internet seems it can crush
 anytime so pls don't pressure the servers :(
 """
 
-class second_spider(scrapy.Spider):
-    name = 'second_spider'
+class SecondSpider(scrapy.Spider):
+    name = 'SecondSpider'
     custom_settings = CUSTOM_SETTINGS
 
     def start_requests(self):
@@ -178,9 +178,9 @@ def main():
     args = parser.parse_args()
 
     if args.crawl_type == 'list':
-        spider_instance = Crawler(first_spider)
+        spider_instance = Crawler(FirstSpider)
     elif args.crawl_type == 'details':
-        spider_instance =  Crawler(second_spider)
+        spider_instance =  Crawler(SecondSpider)
     else:
         print('Argument must be "list" or "details"')
         return
