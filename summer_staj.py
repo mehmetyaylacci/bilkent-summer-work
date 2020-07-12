@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import Crawler, CrawlerProcess
 import csv
 from bs4 import BeautifulSoup as bs
 from urllib import request
+import time
+import logging
+from pprint import pprint
+import argparse
 
 """
 Author: Mehmet Yaylacı
 Year: 2019
+Contributors: 
+- Alp Sayin (alpsayin.com)
 """
 
 """
@@ -25,26 +31,30 @@ hopefully solve this issue.
 ########
 
 # some global variables to create two csv files on .txt format
-first_outfile = "data/first.txt"
-second_outfile = "data/second.txt"
+first_outfile = "data/first.csv"
+second_outfile = "data/second.csv"
 second_infile = first_outfile
+
+CUSTOM_SETTINGS = { 'DOWNLOAD_DELAY': 0.1,
+                    # 'ITEM_PIPELINES': {'freedom.pipelines.IndexPipeline': 300 }
+                    }
 
 """
     First of the spiders. Just goes through the first sets of pages and extracts links 
 with some other information.
 """
 
-class first_spider(scrapy.Spider):
-    name = 'first_spider'
+class FirstSpider(scrapy.Spider):
+    name = 'FirstSpider'
+    custom_settings = CUSTOM_SETTINGS
+    def __init__(self, *args, **kwargs):
+        super(FirstSpider, self).__init__(*args, **kwargs)
+        self.companies = dict()
+
 
     def start_requests(self):
         # setting custom settings, this will hopefully solve a possible ddos.
-        custom_settings = {
-            'DOWNLOAD_DELAY': 0.01,
-            'ITEM_PIPELINES': {
-                'freedom.pipelines.IndexPipeline': 300
-            }
-        }
+
 
         global first_outfile
 
@@ -61,11 +71,14 @@ class first_spider(scrapy.Spider):
             html = response.read()
             page = bs(html)
             # page.prettify()
-            rangeOfPages = page.find("span", {"style": "font-size:1.2em;"}).getText()
+            company_table = page.find('table', {'id':'companies'})
+            first_col = company_table.find('td', {'style':'font-size:0.9em;'})
+            page_indicator = first_col.find("span", {"style": "font-size:1.2em;"}).getText()
+            last_page_num = int(page_indicator.split('/')[1].replace(' ',''))
+            logging.debug('last_page_num={}'.format(last_page_num))
 
-
-        for site in range(int(rangeOfPages[4:])):
-            url = "http://mfstaj.cs.bilkent.edu.tr/visitor/?page=company&start=" + str(site) + "&filter=AllCompanies"
+        for page_num in range(last_page_num):
+            url = "http://mfstaj.cs.bilkent.edu.tr/visitor/?page=company&start={}&filter=AllCompanies".format(page_num)
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
@@ -74,24 +87,26 @@ class first_spider(scrapy.Spider):
 
         stuff = []
 
-        size = len(soup.find_all("td", class_="companyName"))
+        all_rows = soup.find_all("tr", class_="company")
+        size = len(all_rows)
 
         former_id = 0  # this checks duplicates. thanks bilkent for the mistakes :(
 
-        for x in range(size):
-                company = soup.find_all("td", class_="companyName")[x]
-                companyTop = soup.find_all("tr", class_="company")[x]
-                listOfAtt = companyTop.find_all("td")
+        for row in all_rows:
+            company_info = row.find_all("td")
+            name = company_info[0].getText().strip(' ')
+            city = company_info[1].getText().strip(' ')
+            depts = company_info[2].getText().strip(' ')
+            sector = company_info[3].getText().strip(' ')
+            cid = company_info[0].find("a")["href"].split('CompanyID=')[1]
 
-                newID = company.find("a")["href"][-4:].strip()
-
-                # getting rid of duplicates will help us on the next spider.
-                if newID != former_id:
-                        self.writer.writerow([company.get_text().strip(), newID,
-                                                    listOfAtt[1].get_text().strip(), listOfAtt[2].get_text().strip(),
-                                                        listOfAtt[3].get_text().strip()])
-
-                        former_id = company.find("a")["href"][-4:].strip()
+            # this is all preparation to eventually move to pandas as that's the industry standard
+            new_company = {'name':name, 'city':city, 'depts':depts, 'sector':sector}
+            if cid in self.companies:
+                self.companies[cid].update(new_company) # this will merge info if there are duplicates while enforcing there are no dupes
+            else:
+                self.companies[cid] = new_company
+                self.writer.writerow([ name,  cid, city, depts, sector])
 
 ########
 
@@ -101,17 +116,12 @@ pages one by one. Pls don't ddos Bilkent. Bilkent's internet seems it can crush
 anytime so pls don't pressure the servers :(
 """
 
-class second_spider(scrapy.Spider):
-    name = 'second_spider'
+class SecondSpider(scrapy.Spider):
+    name = 'SecondSpider'
+    custom_settings = CUSTOM_SETTINGS
 
     def start_requests(self):
         # setting custom settings, this will hopefully solve a possible ddos.
-        custom_settings = {
-            'DOWNLOAD_DELAY': 0.01,
-            'ITEM_PIPELINES': {
-                'freedom.pipelines.IndexPipeline': 300
-            }
-        }
 
         global second_infile, second_outfile
 
@@ -150,12 +160,42 @@ class second_spider(scrapy.Spider):
 so call them one at a time.
 """
 
-def first_process():
-    process = CrawlerProcess()
-    process.crawl(first_spider)
-    process.start()
+def setup_logger():
+    FORMAT = '%(asctime)-15s %(name)s - %(levelname)s: %(message)s'
+    logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+    logging.debug('DEBUG messages are printed')
+    logging.info('INFO messages are printed')
+    logging.warning('WARNING messages are printed')
+    logging.error('ERROR messages are printed')
+    logging.critical('CRITICAL messages are printed')
 
-def second_process():
-    process2 = CrawlerProcess()
-    process2.crawl(second_spider)
-    process2.start()
+
+def main():
+    setup_logger()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('crawl_type', help='"list" or "details". Note that you must have run list beforehand to be able to run details')
+    args = parser.parse_args()
+
+    if args.crawl_type == 'list':
+        spider_instance = Crawler(FirstSpider)
+    elif args.crawl_type == 'details':
+        spider_instance =  Crawler(SecondSpider)
+    else:
+        print('Argument must be "list" or "details"')
+        return
+
+    process = CrawlerProcess()
+    process.crawl(spider_instance)
+    logging.info('starting crawling process')
+    process.start(stop_after_crawl=True)
+    logging.info('crawling process finished')
+    process.join()
+    logging.info('all crawlers finished')
+
+    if args.crawl_type == 'list':
+        print('final companies list')
+        pprint(spider_instance.spider.companies)
+
+if __name__ == '__main__':
+    main()
